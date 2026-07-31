@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Absensi Harian Staff - Kesantrian</title>
+    
+    <meta name="theme-color" content="#198754">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" type="image/png" href="icon-192x192.png">
+    <link rel="apple-touch-icon" href="icon-192x192.png">
+
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="app-container">
+        <div id="loader-overlay" class="loader-overlay d-none">
+            <div class="spinner"></div>
+            <div class="loader-text mt-3 fw-medium">Memproses Data...</div>
+        </div>
+
+        <div id="toast-container" class="toast-container"></div>
+
+        <div class="main-card">
+            <div class="header-section">
+                <div class="logo-wrapper">
+                    <img src="https://lh3.googleusercontent.com/d/1gHUjCj4lXfwJn1Fj11O1peAVjT3Xosqh" alt="Logo Kesantrian" class="logo-img">
+                </div>
+                <h1 class="app-title">Absensi Harian Staff</h1>
+                <p class="app-subtitle">Unit Kesantrian Ponpes Imam Syafi'i Brebes</p>
+            </div>
+
+            <form id="form-absen" class="form-section">
+                <div class="form-row">
+                    <div class="form-group flex-2">
+                        <label for="tanggal">Hari & Tanggal</label>
+                        <input type="date" id="tanggal" name="tanggal" required>
+                    </div>
+                    <div class="form-group flex-1">
+                        <label for="jam">Jam (Otomatis)</label>
+                        <input type="time" id="jam" name="jam" readonly class="input-readonly">
+                    </div>
+                </div>
+
+                <div class="form-group autocomplete-container">
+                    <label for="nama_staff">Nama Staff / Username</label>
+                    <div class="input-with-icon">
+                        <i class="bi bi-person"></i>
+                        <input type="text" id="nama_staff" name="nama_staff" placeholder="Ketik nama Anda..." autocomplete="off" required>
+                    </div>
+                    <ul id="autocomplete-list" class="autocomplete-list d-none"></ul>
+                </div>
+
+                <div class="form-group">
+                    <label for="shift">Waktu / Shift</label>
+                    <div class="input-with-icon">
+                        <i class="bi bi-clock-history"></i>
+                        <select id="shift" name="shift" required>
+                            <option value="">-- Memuat Shift... --</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Status Kehadiran</label>
+                    <div class="status-options">
+                        <label class="status-btn btn-hadir">
+                            <input type="radio" name="status" value="Hadir" checked>
+                            <span>Hadir</span>
+                        </label>
+                        <label class="status-btn btn-sakit">
+                            <input type="radio" name="status" value="Sakit">
+                            <span>Sakit</span>
+                        </label>
+                        <label class="status-btn btn-izin">
+                            <input type="radio" name="status" value="Izin">
+                            <span>Izin</span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="form-group" id="catatan-group" style="display: none;">
+                    <label for="catatan">Keterangan / Catatan</label>
+                    <textarea id="catatan" name="catatan" rows="2" placeholder="Tulis alasan jika Sakit/Izin..."></textarea>
+                </div>
+
+                <div id="shift-alert" class="shift-alert d-none">
+                    <i class="bi bi-info-circle-fill"></i>
+                    <span id="shift-alert-msg"></span>
+                </div>
+
+                <button type="submit" id="btn-submit" class="btn-submit">
+                    <i class="bi bi-send"></i> Kirim Absensi
+                </button>
+            </form>
+        </div>
+    </div>
+    <script src="app.js"></script>
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('sw.js')
+                    .then(registration => {
+                        console.log('ServiceWorker registered');
+                    })
+                    .catch(error => {
+                        console.log('ServiceWorker registration failed', error);
+                    });
+            });
+        }
+    </script>
+</body>
+</html>
