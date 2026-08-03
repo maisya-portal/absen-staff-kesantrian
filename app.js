@@ -43,7 +43,7 @@ function updateTime() {
 // Fetch Shifts from Backend
 async function loadShifts() {
     try {
-        const res = await fetch(`${GAS_URL}?api=get_shifts`);
+        const res = await fetch(`${GAS_URL}?api=get_shifts&_t=${new Date().getTime()}`);
         const result = await res.json();
         
         if (result.success) {
@@ -67,7 +67,7 @@ async function loadShifts() {
 // Fetch Staff
 async function loadStaff() {
     try {
-        const res = await fetch(`${GAS_URL}?api=get_staff`);
+        const res = await fetch(`${GAS_URL}?api=get_staff&_t=${new Date().getTime()}`);
         const result = await res.json();
         if (result.success) {
             staffUsernames = result.data;
@@ -81,8 +81,8 @@ async function loadStaff() {
             });
         }
     } catch (err) {
-        console.error('Failed to load staff list');
-        namaStaffInput.innerHTML = '<option value="">-- Gagal memuat staff --</option>';
+        console.error('Failed to load staff list:', err);
+        namaStaffInput.innerHTML = `<option value="">-- Error: ${err.message || 'CORS/Network'} --</option>`;
     }
 }
 
