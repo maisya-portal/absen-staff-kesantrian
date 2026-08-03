@@ -9,7 +9,7 @@ const tanggalInput = document.getElementById('tanggal');
 const jamInput = document.getElementById('jam');
 const shiftSelect = document.getElementById('shift');
 const namaStaffInput = document.getElementById('nama_staff');
-const autocompleteList = document.getElementById('autocomplete-list');
+
 const btnSubmit = document.getElementById('btn-submit');
 const shiftAlert = document.getElementById('shift-alert');
 const shiftAlertMsg = document.getElementById('shift-alert-msg');
@@ -51,11 +51,11 @@ async function loadShifts() {
             shiftSelect.innerHTML = '<option value="">-- Pilih Shift --</option>';
             shiftData.forEach(shift => {
                 const opt = document.createElement('option');
-                opt.value = shift.Nama_Shift;
-                opt.textContent = `${shift.Nama_Shift} (${shift.Jam_Masuk} - ${shift.Jam_Pulang})`;
-                opt.dataset.masuk = shift.Jam_Masuk;
-                opt.dataset.pulang = shift.Jam_Pulang;
-                opt.dataset.telat = shift.Toleransi_Telat_Menit;
+                opt.value = shift.nama;
+                opt.textContent = `${shift.nama} (${shift.masuk} - ${shift.pulang})`;
+                opt.dataset.masuk = shift.masuk;
+                opt.dataset.pulang = shift.pulang;
+                opt.dataset.telat = shift.telat;
                 shiftSelect.appendChild(opt);
             });
         }
@@ -64,52 +64,27 @@ async function loadShifts() {
     }
 }
 
-// Fetch Staff for Autocomplete
+// Fetch Staff
 async function loadStaff() {
     try {
         const res = await fetch(`${GAS_URL}?api=get_staff`);
         const result = await res.json();
         if (result.success) {
             staffUsernames = result.data;
+            namaStaffInput.innerHTML = '<option value="">-- Pilih Nama Anda --</option>';
+            staffUsernames.forEach(staff => {
+                const opt = document.createElement('option');
+                opt.value = staff.username;
+                let namaTampil = staff.nama_lengkap || staff.username;
+                opt.textContent = `${namaTampil} (${staff.nama_role})`;
+                namaStaffInput.appendChild(opt);
+            });
         }
     } catch (err) {
         console.error('Failed to load staff list');
+        namaStaffInput.innerHTML = '<option value="">-- Gagal memuat staff --</option>';
     }
 }
-
-// Autocomplete Logic
-namaStaffInput.addEventListener('input', function() {
-    const val = this.value;
-    autocompleteList.innerHTML = '';
-    
-    if (!val || val.length < 1) {
-        autocompleteList.classList.add('d-none');
-        return;
-    }
-    
-    const matches = staffUsernames.filter(item => item.toLowerCase().includes(val.toLowerCase())).slice(0, 5);
-    
-    if (matches.length > 0) {
-        autocompleteList.classList.remove('d-none');
-        matches.forEach(match => {
-            const li = document.createElement('li');
-            li.textContent = match;
-            li.addEventListener('click', () => {
-                namaStaffInput.value = match.split('(')[0].trim();
-                autocompleteList.classList.add('d-none');
-            });
-            autocompleteList.appendChild(li);
-        });
-    } else {
-        autocompleteList.classList.add('d-none');
-    }
-});
-
-document.addEventListener('click', (e) => {
-    if (e.target !== namaStaffInput) {
-        autocompleteList.classList.add('d-none');
-    }
-});
 
 // Shift Validation Logic
 shiftSelect.addEventListener('change', validateShiftTime);
