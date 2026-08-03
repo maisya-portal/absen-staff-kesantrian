@@ -1,29 +1,83 @@
 import os
 
-app_path = "C:/1.MAISYA-PORTAL/absen-staff-kesantrian/app.js"
-with open(app_path, "r", encoding="utf-8") as f:
-    app_js = f.read()
+js_path = "C:/1.MAISYA-PORTAL/absen-staff-kesantrian/app.js"
+with open(js_path, "r", encoding="utf-8") as f:
+    js = f.read()
 
-# Replace loadStaff catch block to show error message
-old_catch = """    } catch (err) {
-        console.error('Failed to load staff list');
-        namaStaffInput.innerHTML = '<option value="">-- Gagal memuat staff --</option>';
-    }"""
+# Update DOM elements
+old_dom = """const btnSubmit = document.getElementById('btn-submit');"""
+new_dom = """const btnMasuk = document.getElementById('btn-masuk');
+const btnPulang = document.getElementById('btn-pulang');"""
+js = js.replace(old_dom, new_dom)
 
-new_catch = """    } catch (err) {
-        console.error('Failed to load staff list:', err);
-        namaStaffInput.innerHTML = `<option value="">-- Error: ${err.message || 'CORS/Network'} --</option>`;
-    }"""
-app_js = app_js.replace(old_catch, new_catch)
+# Update validateShiftTime
+old_val = """    // Reset
+    shiftAlert.classList.add('d-none');
+    btnSubmit.disabled = false;"""
+new_val = """    // Reset
+    shiftAlert.classList.add('d-none');
+    if (btnMasuk) btnMasuk.disabled = false;
+    if (btnPulang) btnPulang.disabled = false;"""
+js = js.replace(old_val, new_val)
 
-# Also add cache buster to fetch
-old_fetch_staff = """const res = await fetch(`${GAS_URL}?api=get_staff`);"""
-new_fetch_staff = """const res = await fetch(`${GAS_URL}?api=get_staff&_t=${new Date().getTime()}`);"""
-app_js = app_js.replace(old_fetch_staff, new_fetch_staff)
+old_val2 = """        shiftAlert.classList.remove('d-none');
+        btnSubmit.disabled = true;"""
+new_val2 = """        shiftAlert.classList.remove('d-none');
+        if (btnMasuk) btnMasuk.disabled = true;
+        if (btnPulang) btnPulang.disabled = true;"""
+js = js.replace(old_val2, new_val2).replace(old_val2, new_val2) # replace twice
 
-old_fetch_shifts = """const res = await fetch(`${GAS_URL}?api=get_shifts`);"""
-new_fetch_shifts = """const res = await fetch(`${GAS_URL}?api=get_shifts&_t=${new Date().getTime()}`);"""
-app_js = app_js.replace(old_fetch_shifts, new_fetch_shifts)
+# Update form submission to use buttons
+old_sub = """// Form Submission
+form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    const payload = {"""
+new_sub = """// Form Submission
+async function submitAbsen(jenis) {
+    // Validate form
+    if (!form.checkValidity()) {
+        form.reportValidity();
+        return;
+    }
+    
+    let staffSelect = document.getElementById('nama_staff');
+    let staffId = "";
+    if(staffSelect && staffSelect.options[staffSelect.selectedIndex]) {
+        let opt = staffSelect.options[staffSelect.selectedIndex];
+        staffId = opt.dataset.id || "";
+    }
+    
+    const payload = {
+        jenis_absen: jenis,
+        id_staff: staffId,"""
+js = js.replace(old_sub, new_sub)
 
-with open(app_path, "w", encoding="utf-8") as f:
-    f.write(app_js)
+# Change staff options to include dataset.id
+old_opt = """                opt.value = staff.username;
+                let namaTampil = staff.nama_lengkap || staff.username;
+                opt.textContent = `${namaTampil} (${staff.nama_role})`;
+                namaStaffInput.appendChild(opt);"""
+new_opt = """                opt.value = staff.username;
+                opt.dataset.id = staff.ID_Staff || staff.id_staff || "";
+                let namaTampil = staff.nama_lengkap || staff.username;
+                opt.textContent = `${namaTampil} (${staff.nama_role || staff.Role || '-'})`;
+                namaStaffInput.appendChild(opt);"""
+js = js.replace(old_opt, new_opt)
+
+# End of submitAbsen
+old_end = """    } finally {
+        loader.classList.add('d-none');
+    }
+});"""
+new_end = """    } finally {
+        loader.classList.add('d-none');
+    }
+}
+
+if(btnMasuk) btnMasuk.addEventListener('click', () => submitAbsen('masuk'));
+if(btnPulang) btnPulang.addEventListener('click', () => submitAbsen('pulang'));"""
+js = js.replace(old_end, new_end)
+
+with open(js_path, "w", encoding="utf-8") as f:
+    f.write(js)

@@ -10,7 +10,8 @@ const jamInput = document.getElementById('jam');
 const shiftSelect = document.getElementById('shift');
 const namaStaffInput = document.getElementById('nama_staff');
 
-const btnSubmit = document.getElementById('btn-submit');
+const btnMasuk = document.getElementById('btn-masuk');
+const btnPulang = document.getElementById('btn-pulang');
 const shiftAlert = document.getElementById('shift-alert');
 const shiftAlertMsg = document.getElementById('shift-alert-msg');
 const loader = document.getElementById('loader-overlay');
@@ -77,8 +78,9 @@ async function loadStaff() {
             staffUsernames.forEach(staff => {
                 const opt = document.createElement('option');
                 opt.value = staff.username;
+                opt.dataset.id = staff.ID_Staff || staff.id_staff || "";
                 let namaTampil = staff.nama_lengkap || staff.username;
-                opt.textContent = `${namaTampil} (${staff.nama_role})`;
+                opt.textContent = `${namaTampil} (${staff.nama_role || staff.Role || '-'})`;
                 namaStaffInput.appendChild(opt);
             });
         }
@@ -96,7 +98,8 @@ function validateShiftTime() {
     
     // Reset
     shiftAlert.classList.add('d-none');
-    btnSubmit.disabled = false;
+    if (btnMasuk) btnMasuk.disabled = false;
+    if (btnPulang) btnPulang.disabled = false;
     
     if (!selectedShift.value) return;
 
@@ -118,14 +121,16 @@ function validateShiftTime() {
         shiftAlert.className = 'shift-alert alert-warning';
         shiftAlertMsg.innerHTML = `Belum masuk jam kerja shift ini. Absensi dibuka mulai jam ${pad(masukDate.getHours()-1)}:${pad(masukDate.getMinutes())}.`;
         shiftAlert.classList.remove('d-none');
-        btnSubmit.disabled = true;
+        if (btnMasuk) btnMasuk.disabled = true;
+        if (btnPulang) btnPulang.disabled = true;
     }
     // 2. Can't check in if passing tolerance (e.g. 180 mins late)
     else if (diffMins > toleransiMenit) {
         shiftAlert.className = 'shift-alert alert-danger';
         shiftAlertMsg.innerHTML = `Batas waktu pengajuan absen untuk shift ini telah lewat (${toleransiMenit} menit dari jam masuk).`;
         shiftAlert.classList.remove('d-none');
-        btnSubmit.disabled = true;
+        if (btnMasuk) btnMasuk.disabled = true;
+        if (btnPulang) btnPulang.disabled = true;
     }
     // 3. Late but within tolerance
     else if (diffMins > 0) {
@@ -153,10 +158,23 @@ statusRadios.forEach(radio => {
 });
 
 // Form Submission
-form.addEventListener('submit', async (e) => {
-    e.preventDefault();
+async function submitAbsen(jenis) {
+    // Validate form
+    if (!form.checkValidity()) {
+        form.reportValidity();
+        return;
+    }
+    
+    let staffSelect = document.getElementById('nama_staff');
+    let staffId = "";
+    if(staffSelect && staffSelect.options[staffSelect.selectedIndex]) {
+        let opt = staffSelect.options[staffSelect.selectedIndex];
+        staffId = opt.dataset.id || "";
+    }
     
     const payload = {
+        jenis_absen: jenis,
+        id_staff: staffId,
         tanggal: tanggalInput.value,
         jam_absen: jamInput.value,
         shift: shiftSelect.value,
@@ -207,7 +225,10 @@ form.addEventListener('submit', async (e) => {
     } finally {
         loader.classList.add('d-none');
     }
-});
+}
+
+if(btnMasuk) btnMasuk.addEventListener('click', () => submitAbsen('masuk'));
+if(btnPulang) btnPulang.addEventListener('click', () => submitAbsen('pulang'));
 
 // UI Toast
 function showToast(msg, type = 'success') {
