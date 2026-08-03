@@ -43,7 +43,7 @@ function updateTime() {
 // Fetch Shifts from Backend
 async function loadShifts() {
     try {
-        const res = await fetch(`${GAS_URL}?api=get_shifts&_t=${new Date().getTime()}`);
+        const res = await fetch(`${GAS_URL}?api=get_shifts&_t=${new Date().getTime()}`, { redirect: 'follow', credentials: 'omit' });
         const result = await res.json();
         
         if (result.success) {
@@ -67,7 +67,7 @@ async function loadShifts() {
 // Fetch Staff
 async function loadStaff() {
     try {
-        const res = await fetch(`${GAS_URL}?api=get_staff&_t=${new Date().getTime()}`);
+        const res = await fetch(`${GAS_URL}?api=get_staff&_t=${new Date().getTime()}`, { redirect: 'follow', credentials: 'omit' });
         const result = await res.json();
         if (result.success) {
             staffUsernames = result.data;
@@ -185,7 +185,9 @@ form.addEventListener('submit', async (e) => {
             body: JSON.stringify(payload),
             headers: {
                 'Content-Type': 'text/plain;charset=utf-8' // GAS requires text/plain for CORS POST
-            }
+            },
+            redirect: 'follow',
+            credentials: 'omit'
         });
         
         const result = await response.json();
