@@ -58,6 +58,8 @@ async function loadShifts() {
                 opt.dataset.telat = shift.telat;
                 shiftSelect.appendChild(opt);
             });
+        } else {
+            shiftSelect.innerHTML = `<option value="">-- Error: ${result.message} --</option>`;
         }
     } catch (err) {
         showToast('Gagal memuat jadwal shift', 'danger');
