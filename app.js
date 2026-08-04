@@ -197,8 +197,7 @@ function validateShiftTime() {
     
     // Reset
     shiftAlert.classList.add('d-none');
-    if (btnMasuk) btnMasuk.disabled = false;
-    if (btnPulang) btnPulang.disabled = false;
+    if (btnSubmitAbsen) btnSubmitAbsen.disabled = false;
     
     if (!selectedShift || !selectedShift.value) return;
 
@@ -245,8 +244,13 @@ function validateShiftTime() {
         msgs.push(`Batas toleransi Absen Pulang telah lewat (${toleransiMenit} menit). Status tercatat terlambat.`);
     }
 
-    if (btnMasuk) btnMasuk.disabled = masukDisabled;
-    if (btnPulang) btnPulang.disabled = pulangDisabled;
+    const jenis = document.querySelector('input[name="jenis_absen"]:checked').value;
+    
+    if (jenis === 'Masuk' && masukDisabled) {
+        if (btnSubmitAbsen) btnSubmitAbsen.disabled = true;
+    } else if (jenis === 'Pulang' && pulangDisabled) {
+        if (btnSubmitAbsen) btnSubmitAbsen.disabled = true;
+    }
 
     if (masukDisabled && pulangDisabled) {
         shiftAlert.className = 'shift-alert alert-danger';
@@ -407,6 +411,9 @@ window.updateAbsenType = function() {
         btnSubmit.style.background = '#dc3545'; // warning color for contrast
         btnSubmit.style.color = '#fff';
     }
+    
+    // Validasi ulang jam shift sesuai jenis absensi yang dipilih
+    validateShiftTime();
 };
 
 // UI Toast
