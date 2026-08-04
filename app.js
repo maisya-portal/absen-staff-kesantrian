@@ -1,6 +1,7 @@
 // CONFIG
 const GAS_URL = 'https://script.google.com/macros/s/AKfycbwELxlXYsX7G_o4A25hi_5bd7dsEO3wIdFJXxmIWV4393O7CiRXyA19tDEFTuYrtmQb/exec';
 let shiftData = [];
+let roleData = [];
 let staffUsernames = [];
 
 // DOM Elements
@@ -49,22 +50,34 @@ async function loadShifts() {
         
         if (result.success) {
             shiftData = result.data;
-            shiftSelect.innerHTML = '<option value="">-- Pilih Shift --</option>';
-            shiftData.forEach(shift => {
-                const opt = document.createElement('option');
-                opt.value = shift.nama;
-                opt.textContent = `${shift.nama} (${shift.masuk} - ${shift.pulang})`;
-                opt.dataset.masuk = shift.masuk;
-                opt.dataset.pulang = shift.pulang;
-                opt.dataset.telat = shift.telat;
-                shiftSelect.appendChild(opt);
-            });
+            roleData = result.roles || [];
+            
+            // Populate initially (will be filtered later based on user role)
+            populateShifts(shiftData);
         } else {
             shiftSelect.innerHTML = `<option value="">-- Error: ${result.message} --</option>`;
         }
     } catch (err) {
         showToast('Gagal memuat jadwal shift', 'danger');
     }
+}
+
+function populateShifts(shifts) {
+    shiftSelect.innerHTML = '<option value="">-- Pilih Shift --</option>';
+    if (!shifts || shifts.length === 0) {
+        shiftSelect.innerHTML = '<option value="">-- Tidak ada shift tersedia --</option>';
+        return;
+    }
+    shifts.forEach(shift => {
+        const opt = document.createElement('option');
+        opt.value = shift.nama;
+        opt.textContent = `${shift.nama} (${shift.masuk} - ${shift.pulang})`;
+        opt.dataset.masuk = shift.masuk;
+        opt.dataset.pulang = shift.pulang;
+        opt.dataset.telat = shift.telat;
+        opt.dataset.id = shift.id;
+        shiftSelect.appendChild(opt);
+    });
 }
 
 // Fetch Staff
@@ -79,6 +92,9 @@ async function loadStaff() {
                 const opt = document.createElement('option');
                 opt.value = staff.username;
                 opt.dataset.id = staff.ID_Staff || staff.id_staff || "";
+                opt.dataset.roleId = staff.Role || staff.id_role || "";
+                opt.dataset.roleName = staff.nama_role || "";
+                
                 let namaTampil = staff.nama_lengkap || staff.username;
                 opt.textContent = `${namaTampil} (${staff.nama_role || staff.Role || '-'})`;
                 namaStaffInput.appendChild(opt);
@@ -88,6 +104,60 @@ async function loadStaff() {
         console.error('Failed to load staff list:', err);
         namaStaffInput.innerHTML = `<option value="">-- Error: ${err.message || 'CORS/Network'} --</option>`;
     }
+}
+
+// Handle Staff Selection and Multiple Roles
+namaStaffInput.addEventListener('change', () => {
+    const selectedOpt = namaStaffInput.options[namaStaffInput.selectedIndex];
+    if (!selectedOpt || !selectedOpt.value) {
+        populateShifts(shiftData); // reset to all if no staff selected
+        return;
+    }
+    
+    const roleId = selectedOpt.dataset.roleId || "";
+    const roleName = selectedOpt.dataset.roleName || "";
+    
+    if (roleId.includes(',')) {
+        // Multi-role: Prompt user to choose
+        const roles = roleId.split(',').map(r => r.trim());
+        const roleNames = roleName ? roleName.split(',').map(r => r.trim()) : roles;
+        
+        const roleListDiv = document.getElementById('role-list');
+        roleListDiv.innerHTML = '';
+        
+        roles.forEach((r, idx) => {
+            const btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = 'btn-submit mb-2';
+            btn.style.cssText = 'background: #0d6efd; text-align: left; padding: 12px 15px; border-radius: 8px;';
+            btn.innerHTML = `<i class="bi bi-shield-check me-2"></i> ${roleNames[idx] || r}`;
+            btn.onclick = () => {
+                document.getElementById('role-overlay').classList.add('d-none');
+                filterShiftsByRole(r);
+            };
+            roleListDiv.appendChild(btn);
+        });
+        
+        document.getElementById('role-overlay').classList.remove('d-none');
+    } else {
+        // Single role
+        filterShiftsByRole(roleId);
+    }
+});
+
+function filterShiftsByRole(selectedRole) {
+    // Find the role in roleData
+    const role = roleData.find(r => r.id_role === selectedRole || r.nama_role === selectedRole);
+    if (!role || !role.waktu_kerja) {
+        // No specific shifts found for this role, display none or all? 
+        // Better display none with a message, but if empty let's show no shifts available.
+        populateShifts([]);
+        return;
+    }
+    
+    const allowedShiftIds = role.waktu_kerja.split(',').map(s => s.trim());
+    const filteredShifts = shiftData.filter(s => allowedShiftIds.includes(s.id.toString()));
+    populateShifts(filteredShifts);
 }
 
 // Shift Validation Logic

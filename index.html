@@ -98,13 +98,31 @@
                     <button type="button" id="btn-masuk" class="btn-submit" style="background: var(--primary);">
                         <i class="bi bi-box-arrow-in-right"></i> Absen Masuk
                     </button>
-                    <button type="button" id="btn-pulang" class="btn-submit" style="background: var(--danger);">
+                    <button type="button" id="btn-pulang" class="btn-submit" style="background: var(--accent);">
                         <i class="bi bi-box-arrow-right"></i> Absen Pulang
                     </button>
                 </div>
             </form>
         </div>
     </div>
+
+    <!-- Role Selection Overlay -->
+    <div id="role-overlay" class="loader-overlay d-none" style="z-index: 9999;">
+        <div class="main-card" style="margin: 20px; padding: 25px;">
+            <div class="text-center mb-4">
+                <i class="bi bi-shield-check text-success" style="font-size: 3rem;"></i>
+                <h4 class="mt-2 fw-bold">Pilih Peran</h4>
+                <p class="text-muted small">Anda terdaftar dengan beberapa peran. Pilih peran untuk melihat shift yang sesuai.</p>
+            </div>
+            <div id="role-list" class="d-flex flex-column gap-2 mb-3">
+                <!-- Roles injected dynamically -->
+            </div>
+            <button type="button" class="btn-submit" style="background: #6c757d;" onclick="document.getElementById('role-overlay').classList.add('d-none'); document.getElementById('nama_staff').value = '';">
+                Batal
+            </button>
+        </div>
+    </div>
+
     <script src="app.js"></script>
     <script>
         if ('serviceWorker' in navigator) {
