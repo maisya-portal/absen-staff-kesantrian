@@ -37,12 +37,13 @@
             <form id="form-absen" class="form-section">
                 <div class="form-row">
                     <div class="form-group flex-2">
-                        <label for="tanggal">Hari & Tanggal</label>
-                        <input type="date" id="tanggal" name="tanggal" required>
+                        <label for="tanggal_display">Hari & Tanggal</label>
+                        <input type="text" id="tanggal_display" readonly class="input-readonly">
+                        <input type="hidden" id="tanggal" name="tanggal" required>
                     </div>
                     <div class="form-group flex-1">
                         <label for="jam">Jam (Otomatis)</label>
-                        <input type="time" id="jam" name="jam" readonly class="input-readonly">
+                        <input type="text" id="jam" name="jam" readonly class="input-readonly" style="font-family: monospace; font-size: 1.1rem; font-weight: bold; text-align: center;">
                     </div>
                 </div>
 

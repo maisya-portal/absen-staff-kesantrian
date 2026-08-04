@@ -7,6 +7,7 @@ let staffUsernames = [];
 // DOM Elements
 const form = document.getElementById('form-absen');
 const tanggalInput = document.getElementById('tanggal');
+const tanggalDisplay = document.getElementById('tanggal_display');
 const jamInput = document.getElementById('jam');
 const shiftSelect = document.getElementById('shift');
 const namaStaffInput = document.getElementById('nama_staff');
@@ -30,15 +31,26 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 // Real-time Clock
+function pad(n) { return n < 10 ? '0' + n : n; }
+
 function initDateTime() {
     const now = new Date();
-    tanggalInput.value = now.toISOString().split('T')[0];
+    // For backend payload: YYYY-MM-DD
+    tanggalInput.value = now.getFullYear() + '-' + pad(now.getMonth() + 1) + '-' + pad(now.getDate());
+    
+    // For display: Hari, DD-MM-YYYY
+    const hariList = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+    if (tanggalDisplay) {
+        tanggalDisplay.value = `${hariList[now.getDay()]}, ${pad(now.getDate())}-${pad(now.getMonth() + 1)}-${now.getFullYear()}`;
+    }
+    
     updateTime();
 }
 
 function updateTime() {
     const now = new Date();
-    jamInput.value = now.toTimeString().split(' ')[0].substring(0, 5);
+    // 24-hour format HH:mm
+    jamInput.value = pad(now.getHours()) + ':' + pad(now.getMinutes());
     validateShiftTime();
 }
 
@@ -249,9 +261,7 @@ function validateShiftTime() {
     }
 }
 
-function pad(num) {
-    return num.toString().padStart(2, '0');
-}
+
 
 // Status Toggle Note
 statusRadios.forEach(radio => {
