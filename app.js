@@ -221,8 +221,7 @@ function validateShiftTime() {
         masukDisabled = true;
         msgs.push(`Belum waktu Absen Masuk (buka jam ${pad(masukDate.getHours()-1)}:${pad(masukDate.getMinutes())}).`);
     } else if (diffMinsMasuk > toleransiMenit) {
-        masukDisabled = true;
-        msgs.push(`Batas Absen Masuk telah lewat (${toleransiMenit} menit dari jam masuk).`);
+        msgs.push(`Batas toleransi Absen Masuk telah lewat (${toleransiMenit} menit). Status tercatat terlambat.`);
     } else if (diffMinsMasuk > 0) {
         msgs.push(`Anda terlambat Absen Masuk ${diffMinsMasuk} menit.`);
     }
@@ -231,8 +230,7 @@ function validateShiftTime() {
     if (diffMinsPulang < -480) { // misal belum boleh absen pulang kalau masih 8 jam sebelum pulang
         pulangDisabled = true;
     } else if (diffMinsPulang > toleransiMenit) {
-        pulangDisabled = true;
-        msgs.push(`Batas Absen Pulang telah lewat (${toleransiMenit} menit dari jam pulang).`);
+        msgs.push(`Batas toleransi Absen Pulang telah lewat (${toleransiMenit} menit). Status tercatat terlambat.`);
     }
 
     if (btnMasuk) btnMasuk.disabled = masukDisabled;
@@ -298,14 +296,44 @@ async function submitAbsen(jenis) {
     // Add late calculation to note if late
     const selectedShift = shiftSelect.options[shiftSelect.selectedIndex];
     if (selectedShift) {
-        const jamMasuk = selectedShift.dataset.masuk;
-        const [masukH, masukM] = jamMasuk.split(':');
-        const masukDate = new Date();
-        masukDate.setHours(parseInt(masukH), parseInt(masukM), 0);
-        const diffMins = Math.floor((new Date() - masukDate) / 60000);
+        const now = new Date();
+        let targetTime = "";
         
-        if (diffMins > 0) {
-            payload.catatan = `(Terlambat ${diffMins} mnt) ` + payload.catatan;
+        if (jenis === 'masuk') {
+            targetTime = selectedShift.dataset.masuk;
+        } else if (jenis === 'pulang') {
+            targetTime = selectedShift.dataset.pulang;
+        }
+
+        if (targetTime) {
+            const [targetH, targetM] = targetTime.split(':');
+            const targetDate = new Date();
+            targetDate.setHours(parseInt(targetH), parseInt(targetM), 0);
+            
+            // Adjust for overnight shifts on pulang
+            if (jenis === 'pulang') {
+                const [masukH, masukM] = selectedShift.dataset.masuk.split(':');
+                const masukDate = new Date();
+                masukDate.setHours(parseInt(masukH), parseInt(masukM), 0);
+                if (targetDate < masukDate) {
+                    targetDate.setDate(targetDate.getDate() + 1);
+                }
+            }
+
+            const diffMins = Math.floor((now - targetDate) / 60000);
+            
+            // Calculate limit
+            const toleransiMenit = parseInt(selectedShift.dataset.telat || 60);
+            
+            if (diffMins > toleransiMenit) {
+                // Sangat terlambat / lewat batas
+                const lateType = jenis === 'masuk' ? 'Telat Masuk' : 'Telat Pulang';
+                payload.catatan = `(${lateType} Lewat Batas: ${diffMins} mnt) ` + payload.catatan;
+            } else if (diffMins > 0) {
+                // Terlambat biasa
+                const lateType = jenis === 'masuk' ? 'Telat Masuk' : 'Telat Pulang';
+                payload.catatan = `(${lateType} ${diffMins} mnt) ` + payload.catatan;
+            }
         }
     }
 
