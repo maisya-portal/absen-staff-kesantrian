@@ -56,6 +56,16 @@
                     </div>
                 </div>
 
+                <div class="form-group" id="peran-group" style="display: none;">
+                    <label for="peran_staff">Peran / Jabatan Saat Absen</label>
+                    <div class="input-with-icon">
+                        <i class="bi bi-shield-check"></i>
+                        <select id="peran_staff" name="peran_staff">
+                            <option value="">-- Pilih Peran --</option>
+                        </select>
+                    </div>
+                </div>
+
                 <div class="form-group">
                     <label for="shift">Waktu / Shift</label>
                     <div class="input-with-icon">
@@ -103,23 +113,6 @@
                     </button>
                 </div>
             </form>
-        </div>
-    </div>
-
-    <!-- Role Selection Overlay -->
-    <div id="role-overlay" class="loader-overlay d-none" style="z-index: 9999;">
-        <div class="main-card" style="margin: 20px; padding: 25px;">
-            <div class="text-center mb-4">
-                <i class="bi bi-shield-check text-success" style="font-size: 3rem;"></i>
-                <h4 class="mt-2 fw-bold">Pilih Peran</h4>
-                <p class="text-muted small">Anda terdaftar dengan beberapa peran. Pilih peran untuk melihat shift yang sesuai.</p>
-            </div>
-            <div id="role-list" class="d-flex flex-column gap-2 mb-3">
-                <!-- Roles injected dynamically -->
-            </div>
-            <button type="button" class="btn-submit" style="background: #6c757d;" onclick="document.getElementById('role-overlay').classList.add('d-none'); document.getElementById('nama_staff').value = '';">
-                Batal
-            </button>
         </div>
     </div>
 

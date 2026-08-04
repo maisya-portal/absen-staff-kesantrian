@@ -107,9 +107,15 @@ async function loadStaff() {
 }
 
 // Handle Staff Selection and Multiple Roles
+// Handle Staff Selection and Multiple Roles
 namaStaffInput.addEventListener('change', () => {
     const selectedOpt = namaStaffInput.options[namaStaffInput.selectedIndex];
+    const peranGroup = document.getElementById('peran-group');
+    const peranSelect = document.getElementById('peran_staff');
+    
     if (!selectedOpt || !selectedOpt.value) {
+        peranGroup.style.display = 'none';
+        peranSelect.innerHTML = '<option value="">-- Pilih Peran --</option>';
         populateShifts(shiftData); // reset to all if no staff selected
         return;
     }
@@ -118,32 +124,43 @@ namaStaffInput.addEventListener('change', () => {
     const roleName = selectedOpt.dataset.roleName || "";
     
     if (roleId.includes(',')) {
-        // Multi-role: Prompt user to choose
+        // Multi-role: Populate select
         const roles = roleId.split(',').map(r => r.trim());
         const roleNames = roleName ? roleName.split(',').map(r => r.trim()) : roles;
         
-        const roleListDiv = document.getElementById('role-list');
-        roleListDiv.innerHTML = '';
-        
+        peranSelect.innerHTML = '<option value="">-- Pilih Peran Anda --</option>';
         roles.forEach((r, idx) => {
-            const btn = document.createElement('button');
-            btn.type = 'button';
-            btn.className = 'btn-submit mb-2';
-            btn.style.cssText = 'background: #0d6efd; text-align: left; padding: 12px 15px; border-radius: 8px;';
-            btn.innerHTML = `<i class="bi bi-shield-check me-2"></i> ${roleNames[idx] || r}`;
-            btn.onclick = () => {
-                document.getElementById('role-overlay').classList.add('d-none');
-                filterShiftsByRole(r);
-            };
-            roleListDiv.appendChild(btn);
+            const opt = document.createElement('option');
+            opt.value = r;
+            opt.textContent = roleNames[idx] || r;
+            peranSelect.appendChild(opt);
         });
         
-        document.getElementById('role-overlay').classList.remove('d-none');
+        peranGroup.style.display = 'block';
+        peranSelect.required = true;
+        
+        // Reset shift select because they haven't picked a role yet
+        populateShifts([]);
     } else {
         // Single role
+        peranGroup.style.display = 'none';
+        peranSelect.required = false;
+        peranSelect.innerHTML = `<option value="${roleId}">${roleName || roleId}</option>`;
         filterShiftsByRole(roleId);
     }
 });
+
+// Handle Peran Selection
+const peranSelect = document.getElementById('peran_staff');
+if (peranSelect) {
+    peranSelect.addEventListener('change', () => {
+        if (peranSelect.value) {
+            filterShiftsByRole(peranSelect.value);
+        } else {
+            populateShifts([]);
+        }
+    });
+}
 
 function filterShiftsByRole(selectedRole) {
     // Find the role in roleData
@@ -273,6 +290,7 @@ async function submitAbsen(jenis) {
         jam_absen: jamInput.value,
         shift: shiftSelect.value,
         nama_staff: namaStaffInput.value,
+        peran_staff: document.getElementById('peran_staff') ? document.getElementById('peran_staff').value : "",
         status: document.querySelector('input[name="status"]:checked').value,
         catatan: document.getElementById('catatan').value
     };
