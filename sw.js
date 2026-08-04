@@ -1,4 +1,4 @@
-const CACHE_NAME = 'absen-pwa-v7';
+const CACHE_NAME = 'absen-pwa-v8';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',

@@ -92,7 +92,7 @@ async function loadStaff() {
                 const opt = document.createElement('option');
                 opt.value = staff.username;
                 opt.dataset.id = staff.ID_Staff || staff.id_staff || "";
-                opt.dataset.roleId = staff.Role || staff.id_role || "";
+                opt.dataset.roleId = staff.Role || staff.id_role || staff.nama_role || "";
                 opt.dataset.roleName = staff.nama_role || "";
                 
                 let namaTampil = staff.nama_lengkap || staff.username;
