@@ -34,97 +34,28 @@
                 <p class="app-subtitle">Unit Kesantrian Ponpes Imam Syafi'i Brebes</p>
             </div>
 
-            <form id="form-absen" class="form-section">
-                <div class="form-row">
-                    <div class="form-group flex-2">
-                        <label for="tanggal_display">Hari & Tanggal</label>
-                        <input type="text" id="tanggal_display" readonly class="input-readonly">
-                        <input type="hidden" id="tanggal" name="tanggal" required>
-                    </div>
-                    <div class="form-group flex-1">
-                        <label for="jam">Jam (Otomatis)</label>
-                        <input type="text" id="jam" name="jam" readonly class="input-readonly" style="font-family: monospace; font-size: 1.1rem; font-weight: bold; text-align: center;">
-                    </div>
-                </div>
-
-                <div class="form-group mb-4">
-                    <label>Jenis Absensi</label>
-                    <div class="status-options">
-                        <label class="status-btn btn-hadir">
-                            <input type="radio" name="jenis_absen" value="Masuk" id="radio-masuk" checked>
-                            <span><i class="bi bi-box-arrow-in-right me-1"></i> Masuk</span>
-                        </label>
-                        <label class="status-btn btn-sakit" style="--warning: #dc3545;">
-                            <input type="radio" name="jenis_absen" value="Pulang" id="radio-pulang">
-                            <span style="color: var(--text-secondary);"><i class="bi bi-box-arrow-right me-1"></i> Pulang</span>
-                        </label>
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <label for="nama_staff">Nama Staff / Username</label>
-                    <div class="input-with-icon">
-                        <i class="bi bi-person"></i>
-                        <select id="nama_staff" name="nama_staff" required>
-                            <option value="">-- Memuat Staff... --</option>
-                        </select>
-                    </div>
-                </div>
-
-                <div class="form-group" id="peran-group" style="display: none;">
-                    <label for="peran_staff">Peran / Jabatan Saat Absen</label>
-                    <div class="input-with-icon">
-                        <i class="bi bi-shield-check"></i>
-                        <select id="peran_staff" name="peran_staff">
-                            <option value="">-- Pilih Peran --</option>
-                        </select>
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <label for="shift">Waktu / Shift</label>
-                    <div class="input-with-icon">
-                        <i class="bi bi-clock-history"></i>
-                        <select id="shift" name="shift" required>
-                            <option value="">-- Memuat Shift... --</option>
-                        </select>
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <label>Status Kehadiran</label>
-                    <div class="status-options">
-                        <label class="status-btn btn-hadir">
-                            <input type="radio" name="status" value="Hadir" checked>
-                            <span>Hadir</span>
-                        </label>
-                        <label class="status-btn btn-sakit">
-                            <input type="radio" name="status" value="Sakit">
-                            <span>Sakit</span>
-                        </label>
-                        <label class="status-btn btn-izin">
-                            <input type="radio" name="status" value="Izin">
-                            <span>Izin</span>
-                        </label>
-                    </div>
-                </div>
-
-                <div class="form-group" id="catatan-group" style="display: none;">
-                    <label for="catatan">Keterangan / Catatan</label>
-                    <textarea id="catatan" name="catatan" rows="2" placeholder="Tulis alasan jika Sakit/Izin..."></textarea>
-                </div>
-
-                <div id="shift-alert" class="shift-alert d-none">
+            <div class="form-section text-center" style="padding: 2rem; border-radius: 15px; background: #fff; box-shadow: 0 4px 15px rgba(0,0,0,0.05); text-align: center;">
+                <div style="font-size: 3rem; color: #0dcaf0; margin-bottom: 1rem;">
                     <i class="bi bi-info-circle-fill"></i>
-                    <span id="shift-alert-msg"></span>
                 </div>
-
-                <div style="display: flex; gap: 10px;">
-                    <button type="submit" id="btn-submit-absen" class="btn-submit" style="background: var(--primary);">
-                        <i id="btn-submit-icon" class="bi bi-box-arrow-in-right"></i> <span id="btn-submit-text">Absen Masuk</span>
-                    </button>
+                <h3 style="font-weight: 700; color: #2c3e50; margin-bottom: 0.5rem;">Fitur Telah Dipindahkan</h3>
+                <p style="color: #6c757d; line-height: 1.6; margin-bottom: 1.5rem;">
+                    Sistem absensi mandiri melalui halaman ini telah <strong>dinonaktifkan</strong>. Mulai saat ini, seluruh pencatatan waktu kerja (Absen Masuk dan Keluar) dilakukan secara langsung melalui portal utama.
+                </p>
+                <div style="background: rgba(13, 202, 240, 0.1); border-radius: 10px; padding: 15px; margin-bottom: 1.5rem; text-align: left;">
+                    <p style="margin: 0; font-size: 0.95rem; color: #0dcaf0; font-weight: 600;">
+                        <i class="bi bi-check2-circle me-1"></i> Silakan ikuti langkah berikut:
+                    </p>
+                    <ol style="margin-top: 10px; margin-bottom: 0; color: #495057; font-size: 0.9rem; padding-left: 20px;">
+                        <li>Buka aplikasi/halaman <strong>Kesantrian Portal</strong></li>
+                        <li>Login menggunakan akun staf Anda</li>
+                        <li>Pilih menu <strong>Absensi Saya</strong> di bilah navigasi samping</li>
+                    </ol>
                 </div>
-            </form>
+                <a href="https://maisya-portal.github.io/kesantrian-portal" class="btn-submit" style="background: #198754; text-decoration: none; display: inline-block; width: 100%;">
+                    <i class="bi bi-box-arrow-up-right me-2"></i> Menuju Kesantrian Portal
+                </a>
+            </div>
         </div>
     </div>
 
