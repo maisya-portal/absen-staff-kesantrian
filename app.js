@@ -135,30 +135,27 @@ namaStaffInput.addEventListener('change', () => {
     const roleId = selectedOpt.dataset.roleId || "";
     const roleName = selectedOpt.dataset.roleName || "";
     
-    if (roleId.includes(',')) {
-        // Multi-role: Populate select
-        const roles = roleId.split(',').map(r => r.trim());
-        const roleNames = roleName ? roleName.split(',').map(r => r.trim()) : roles;
-        
-        peranSelect.innerHTML = '<option value="">-- Pilih Peran Anda --</option>';
-        roles.forEach((r, idx) => {
-            const opt = document.createElement('option');
-            opt.value = r;
-            opt.textContent = roleNames[idx] || r;
-            peranSelect.appendChild(opt);
-        });
-        
-        peranGroup.style.display = 'block';
-        peranSelect.required = true;
-        
-        // Reset shift select because they haven't picked a role yet
+    const roles = roleId.split(',').map(r => r.trim());
+    const roleNames = roleName ? roleName.split(',').map(r => r.trim()) : roles;
+    
+    peranSelect.innerHTML = roles.length > 1 ? '<option value="">-- Pilih Peran Anda --</option>' : '';
+    roles.forEach((r, idx) => {
+        const opt = document.createElement('option');
+        opt.value = r;
+        opt.textContent = roleNames[idx] || r;
+        peranSelect.appendChild(opt);
+    });
+    
+    peranGroup.style.display = 'block';
+    peranSelect.required = true;
+    
+    if (roles.length > 1) {
+        // Multi-role: wait for selection
         populateShifts([]);
     } else {
-        // Single role
-        peranGroup.style.display = 'none';
-        peranSelect.required = false;
-        peranSelect.innerHTML = `<option value="${roleId}">${roleName || roleId}</option>`;
-        filterShiftsByRole(roleId);
+        // Single role: auto select
+        peranSelect.value = roles[0];
+        filterShiftsByRole(roles[0]);
     }
 });
 
@@ -178,15 +175,19 @@ function filterShiftsByRole(selectedRole) {
     // Find the role in roleData
     const role = roleData.find(r => r.id_role === selectedRole || r.nama_role === selectedRole);
     if (!role || !role.waktu_kerja) {
-        // No specific shifts found for this role, display none or all? 
-        // Better display none with a message, but if empty let's show no shifts available.
-        populateShifts([]);
+        shiftSelect.innerHTML = '<option value="">-- Waktu Kerja belum diatur di Kelola Peran --</option>';
         return;
     }
     
     const allowedShiftIds = role.waktu_kerja.split(',').map(s => s.trim());
-    const filteredShifts = shiftData.filter(s => allowedShiftIds.includes(s.id.toString()));
-    populateShifts(filteredShifts);
+    const filtered = shiftData.filter(s => allowedShiftIds.includes(s.id.toString()));
+    
+    if (filtered.length === 0) {
+        shiftSelect.innerHTML = '<option value="">-- Shift tidak ditemukan (Cek Kelola Peran) --</option>';
+        return;
+    }
+    
+    populateShifts(filtered);
 }
 
 // Shift Validation Logic
