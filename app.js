@@ -12,8 +12,7 @@ const jamInput = document.getElementById('jam');
 const shiftSelect = document.getElementById('shift');
 const namaStaffInput = document.getElementById('nama_staff');
 
-const btnMasuk = document.getElementById('btn-masuk');
-const btnPulang = document.getElementById('btn-pulang');
+const btnSubmitAbsen = document.getElementById('btn-submit-absen');
 const shiftAlert = document.getElementById('shift-alert');
 const shiftAlertMsg = document.getElementById('shift-alert-msg');
 const loader = document.getElementById('loader-overlay');
@@ -378,8 +377,37 @@ async function submitAbsen(jenis) {
     }
 }
 
-if(btnMasuk) btnMasuk.addEventListener('click', () => submitAbsen('masuk'));
-if(btnPulang) btnPulang.addEventListener('click', () => submitAbsen('pulang'));
+if(btnSubmitAbsen) {
+    btnSubmitAbsen.addEventListener('click', (e) => {
+        e.preventDefault();
+        // Cek validasi HTML5 bawaan sebelum submit jika diperlukan
+        if(!form.checkValidity()) {
+            form.reportValidity();
+            return;
+        }
+        const jenis = document.querySelector('input[name="jenis_absen"]:checked').value.toLowerCase();
+        submitAbsen(jenis);
+    });
+}
+
+window.updateAbsenType = function() {
+    const jenis = document.querySelector('input[name="jenis_absen"]:checked').value;
+    const btnText = document.getElementById('btn-submit-text');
+    const btnIcon = document.getElementById('btn-submit-icon');
+    const btnSubmit = document.getElementById('btn-submit-absen');
+    
+    if (jenis === 'Masuk') {
+        btnText.textContent = 'Absen Masuk';
+        btnIcon.className = 'bi bi-box-arrow-in-right';
+        btnSubmit.style.background = 'var(--primary)';
+        btnSubmit.style.color = '#fff';
+    } else {
+        btnText.textContent = 'Absen Pulang';
+        btnIcon.className = 'bi bi-box-arrow-right';
+        btnSubmit.style.background = '#dc3545'; // warning color for contrast
+        btnSubmit.style.color = '#fff';
+    }
+};
 
 // UI Toast
 function showToast(msg, type = 'success') {
