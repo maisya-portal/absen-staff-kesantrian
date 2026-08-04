@@ -96,7 +96,7 @@ async function loadStaff() {
                 opt.dataset.roleName = staff.nama_role || "";
                 
                 let namaTampil = staff.nama_lengkap || staff.username;
-                opt.textContent = `${namaTampil} (${staff.nama_role || staff.Role || '-'})`;
+                opt.textContent = namaTampil;
                 namaStaffInput.appendChild(opt);
             });
         }
@@ -171,9 +171,10 @@ function validateShiftTime() {
     if (btnMasuk) btnMasuk.disabled = false;
     if (btnPulang) btnPulang.disabled = false;
     
-    if (!selectedShift.value) return;
+    if (!selectedShift || !selectedShift.value) return;
 
     const jamMasuk = selectedShift.dataset.masuk;
+    const jamPulang = selectedShift.dataset.pulang;
     const toleransiMenit = parseInt(selectedShift.dataset.telat || 60);
     const now = new Date();
     
@@ -182,30 +183,53 @@ function validateShiftTime() {
     const masukDate = new Date();
     masukDate.setHours(parseInt(masukH), parseInt(masukM), 0);
     
-    const diffMs = now - masukDate;
-    const diffMins = Math.floor(diffMs / 60000);
+    // Convert jamPulang to Date object for today
+    const [pulangH, pulangM] = jamPulang.split(':');
+    const pulangDate = new Date();
+    pulangDate.setHours(parseInt(pulangH), parseInt(pulangM), 0);
+    if (pulangDate < masukDate) {
+        // Shift malam menyeberang hari (misal 20:00 - 04:00)
+        pulangDate.setDate(pulangDate.getDate() + 1);
+    }
     
-    // Validation Rules:
-    // 1. Can't check in more than 60 mins before shift
-    if (diffMins < -60) {
-        shiftAlert.className = 'shift-alert alert-warning';
-        shiftAlertMsg.innerHTML = `Belum masuk jam kerja shift ini. Absensi dibuka mulai jam ${pad(masukDate.getHours()-1)}:${pad(masukDate.getMinutes())}.`;
-        shiftAlert.classList.remove('d-none');
-        if (btnMasuk) btnMasuk.disabled = true;
-        if (btnPulang) btnPulang.disabled = true;
+    const diffMinsMasuk = Math.floor((now - masukDate) / 60000);
+    const diffMinsPulang = Math.floor((now - pulangDate) / 60000);
+    
+    let masukDisabled = false;
+    let pulangDisabled = false;
+    let msgs = [];
+
+    // Validasi Absen Masuk
+    if (diffMinsMasuk < -60) {
+        masukDisabled = true;
+        msgs.push(`Belum waktu Absen Masuk (buka jam ${pad(masukDate.getHours()-1)}:${pad(masukDate.getMinutes())}).`);
+    } else if (diffMinsMasuk > toleransiMenit) {
+        masukDisabled = true;
+        msgs.push(`Batas Absen Masuk telah lewat (${toleransiMenit} menit dari jam masuk).`);
+    } else if (diffMinsMasuk > 0) {
+        msgs.push(`Anda terlambat Absen Masuk ${diffMinsMasuk} menit.`);
     }
-    // 2. Can't check in if passing tolerance (e.g. 180 mins late)
-    else if (diffMins > toleransiMenit) {
+
+    // Validasi Absen Pulang
+    if (diffMinsPulang < -480) { // misal belum boleh absen pulang kalau masih 8 jam sebelum pulang
+        pulangDisabled = true;
+    } else if (diffMinsPulang > toleransiMenit) {
+        pulangDisabled = true;
+        msgs.push(`Batas Absen Pulang telah lewat (${toleransiMenit} menit dari jam pulang).`);
+    }
+
+    if (btnMasuk) btnMasuk.disabled = masukDisabled;
+    if (btnPulang) btnPulang.disabled = pulangDisabled;
+
+    if (masukDisabled && pulangDisabled) {
         shiftAlert.className = 'shift-alert alert-danger';
-        shiftAlertMsg.innerHTML = `Batas waktu pengajuan absen untuk shift ini telah lewat (${toleransiMenit} menit dari jam masuk).`;
-        shiftAlert.classList.remove('d-none');
-        if (btnMasuk) btnMasuk.disabled = true;
-        if (btnPulang) btnPulang.disabled = true;
-    }
-    // 3. Late but within tolerance
-    else if (diffMins > 0) {
+        if (msgs.length === 0) msgs.push("Waktu shift ini tidak aktif saat ini.");
+    } else if (msgs.length > 0) {
         shiftAlert.className = 'shift-alert alert-warning';
-        shiftAlertMsg.innerHTML = `Anda terlambat ${diffMins} menit. Catatan keterlambatan akan disimpan.`;
+    }
+
+    if (msgs.length > 0) {
+        shiftAlertMsg.innerHTML = msgs.join("<br>");
         shiftAlert.classList.remove('d-none');
     }
 }
